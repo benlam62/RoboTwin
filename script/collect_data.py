@@ -204,6 +204,7 @@ def run(TASK_ENV, args):
 
             TASK_ENV.setup_demo(now_ep_num=episode_idx, seed=seed_list[episode_idx], **args)
 
+            if episode_idx < 93 : continue
             traj_data = TASK_ENV.load_tran_data(episode_idx)
             args["left_joint_path"] = traj_data["left_joint_path"]
             args["right_joint_path"] = traj_data["right_joint_path"]

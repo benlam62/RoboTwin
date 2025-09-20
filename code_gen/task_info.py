@@ -1070,7 +1070,7 @@ PUT_OBJECT_CABINET = {
     "task_name": "put_object_cabinet",
     "task_description": "Use one arm to open the cabinet's drawer, and use another arm to put the object on the table to the cabinet's drawer.\
                          The object is randomly placed on the table, if the object's x coordinate (dim 0) is greater than 0, use right arm to grasp the object,\
-                         else use the left arm grasp the object."
+                         else use the left arm grasp the object.",
     "current_code": """
                 class gpt_put_object_cabinet(put_object_cabinet):
                     def play_once(self):

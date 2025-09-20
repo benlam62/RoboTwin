@@ -10,7 +10,7 @@ class place_shoe(Base_Task):
         super()._init_task_env_(**kwags)
 
     def load_actors(self):
-        self.target_block = create_box(
+        self.target = create_box(
             scene=self,
             pose=sapien.Pose([0, -0.08, 0.74], [1, 0, 0, 0]),
             half_size=(0.13, 0.05, 0.0005),

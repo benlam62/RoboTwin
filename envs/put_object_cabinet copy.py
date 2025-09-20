@@ -82,11 +82,42 @@ class put_object_cabinet(Base_Task):
         self.prohibited_area.append([-0.15, -0.3, 0.15, 0.3])
 
     def play_once(self):
-        pass
+        arm_tag = ArmTag("right" if self.object.get_pose().p[0] > 0 else "left")
+        self.arm_tag = arm_tag
+        self.origin_z = self.object.get_pose().p[2]
+
+        # Grasp the object and grasp the drawer bar
+        self.move(self.grasp_actor(self.object, arm_tag=arm_tag, pre_grasp_dis=0.1))
+        self.move(self.grasp_actor(self.cabinet, arm_tag=arm_tag.opposite, pre_grasp_dis=0.05))
+
+        # Pull the drawer
+        for _ in range(4):
+            self.move(self.move_by_displacement(arm_tag=arm_tag.opposite, y=-0.04))
+
+        # Lift the object
+        self.move(self.move_by_displacement(arm_tag=arm_tag, z=0.15))
+
+        # Place the object into the cabinet
+        target_pose = self.cabinet.get_functional_point(0)
+        self.move(self.place_actor(
+            self.object,
+            arm_tag=arm_tag,
+            target_pose=target_pose,
+            pre_dis=0.13,
+            dis=0.1,
+        ))
+
+        self.info["info"] = {
+            "{A}": f"{self.selected_modelname}/base{self.selected_model_id}",
+            "{B}": f"036_cabinet/base{0}",
+            "{a}": str(arm_tag),
+            "{b}": str(arm_tag.opposite),
+        }
+        return self.info
 
     def check_success(self):
         object_pose = self.object.get_pose().p
         target_pose = self.cabinet.get_functional_point(0)
         tag = np.all(abs(object_pose[:2] - target_pose[:2]) < np.array([0.05, 0.05]))
         return ((object_pose[2] - self.origin_z) > 0.007 and (object_pose[2] - self.origin_z) < 0.12 and tag
-                and (self.robot.is_left_gripper_open() if self.arm_tag == "left" else self.robot.is_right_gripper_open()))
+                and self.robot.is_left_gripper_open() if self.arm_tag == "left" else self.robot.is_right_gripper_open())
