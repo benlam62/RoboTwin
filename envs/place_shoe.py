@@ -18,7 +18,7 @@ class place_shoe(Base_Task):
             is_static=True,
             name="box",
         )
-        self.target.config["functional_matrix"] = [[
+        self.target_block.config["functional_matrix"] = [[
             [0.0, -1.0, 0.0, 0.0],
             [-1.0, 0.0, 0.0, 0.0],
             [0.0, 0.0, -1.0, 0],
@@ -70,7 +70,7 @@ class place_shoe(Base_Task):
         self.move(self.move_by_displacement(arm_tag=arm_tag, z=0.07))
 
         # Get target's functional point as target pose
-        target_pose = self.target.get_functional_point(0)
+        target_pose = self.target_block.get_functional_point(0)
         # Place the shoe on the target with alignment constraint and specified pre-placement distance
         self.move(
             self.place_actor(
