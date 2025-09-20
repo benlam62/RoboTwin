@@ -28,3 +28,6 @@ envs/curobo/*
 
 /*.json*
 /*.txt
+policy/pi0/training_data/*
+camera_images/*
+envs_gen/logs/*

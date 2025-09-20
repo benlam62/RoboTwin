@@ -2,8 +2,11 @@ import base64
 import os
 import glob
 from openai import OpenAI
+import google.generativeai as genai
+from PIL import Image
+import io
 
-from gpt_agent import kimi_api, openai_api, deep_seek_api, generate
+from gpt_agent import kimi_api, openai_api, deep_seek_api, GEMINI_API_KEY, generate
 
 
 def observe_task_execution(episode_id, task_name, task_info, problematic_code=None, save_dir="./camera_images", camera_name=None, generate_dir_name=None):
@@ -22,10 +25,10 @@ def observe_task_execution(episode_id, task_name, task_info, problematic_code=No
     Returns:
     str: Textual description of the observation result.
     """
-    client = OpenAI(
-        api_key=kimi_api,
-        base_url="https://api.moonshot.cn/v1",
-    )
+    #client = OpenAI(
+    #    api_key=kimi_api,
+    #    base_url="https://api.moonshot.cn/v1",
+    #)
     
     # Check if the save_dir already contains the task name
     base_task_name = task_name.lower() if task_name else ""
@@ -87,14 +90,15 @@ You will see execution images for the following steps: {', '.join(step_names)}
         prompt += f"\nHere is a piece of potentially problematic code:\n```python\n{problematic_code}\n```\nPlease analyze if the code is related to the observed issue."
     
     # Prepare message content for API call
-    user_content = []
+    #user_content = []
     
     # Add textual prompt
-    user_content.append({
-        "type": "text",
-        "text": prompt
-    })
-    
+    gemini_prompt_parts = ["You are a robot task execution analysis expert. Please analyze the provided image sequence."]
+    #user_content.append({
+    #    "type": "text",
+    #    "text": prompt
+    #})
+
     # Add images and step names
     for img_path in image_files:
         filename = os.path.basename(img_path)
@@ -105,33 +109,44 @@ You will see execution images for the following steps: {', '.join(step_names)}
             step_name = filename.rsplit('.', 1)[0]
         
         # Add step name
-        user_content.append({
-            "type": "text",
-            "text": f"Step: {step_name}"
-        })
+        gemini_prompt_parts.append(f"Step: {step_name}")
+        #user_content.append({
+        #    "type": "text",
+        #    "text": f"Step: {step_name}"
+        #})
         
         # Add image as base64
         try:
             base64_image = encode_image(img_path)
-            user_content.append({
-                "type": "image_url",
-                "image_url": {
-                    "url": f"data:image/png;base64,{base64_image}"
-                }
-            })
+            image_bytes = base64.b64decode(base64_image)
+            image_object = Image.open(io.BytesIO(image_bytes))
+            gemini_prompt_parts.append(image_object)
+            #user_content.append({
+            #    "type": "image_url",
+            #    "image_url": {
+            #        "url": f"data:image/png;base64,{base64_image}"
+            #    }
+            #})
         except Exception as e:
             print(f"Warning: Failed to encode image {img_path}: {str(e)}")
     
     # Call the image analysis API
     try:
-        response = client.chat.completions.create(
-            model="moonshot-v1-32k-vision-preview",
-            messages=[
-                {"role": "system", "content": "You are a robot task execution analysis expert. Please analyze the provided image sequence."},
-                {"role": "user", "content": user_content}
-            ]
-        )
-        return response.choices[0].message.content
+        genai.configure(api_key=GEMINI_API_KEY)
+        MODEL ="gemini-2.5-pro"
+        response = genai.GenerativeModel(MODEL).generate_content(gemini_prompt_parts)
+        return response.text
+        #response = client.chat.completions.create(
+        #    model="moonshot-v1-32k-vision-preview",
+        #    messages=[
+        #        {"role": "system", "content": "You are a robot task execution analysis expert. Please analyze the provided image sequence."},
+        #        {"role": "user", "content": user_content}
+        #    ]
+        #)
+        #
+        #return response.choices[0].message.content
+
+        print('end generating')
     except Exception as e:
         error_msg = f"Error occurred while calling the image understanding API: {str(e)}"
         print(error_msg)
@@ -210,13 +225,16 @@ MODIFIED_CODE:
 """
     
     # Get the modified code from LLM in one call
-    response = generate(message=[{
-        "role": "system",
-        "content": "You are an AI assistant that helps with programming robot tasks."
-    }, {
-        "role": "user",
-        "content": prompt
-    }])
+    message = "You are an AI assistant that helps with programming robot tasks. " + prompt
+    print("Calling Observation Agent")
+    response = generate(message)
+    #response = generate(message=[{
+    #    "role": "system",
+    #    "content": "You are an AI assistant that helps with programming robot tasks."
+    #}, {
+    #    "role": "user",
+    #    "content": prompt
+    #}])
 
     # Extract the step list and modified code
     try:

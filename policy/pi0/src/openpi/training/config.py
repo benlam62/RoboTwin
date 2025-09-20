@@ -325,9 +325,9 @@ class TrainConfig:
     # will increase memory and CPU usage.
     num_workers: int = 2
     # Number of train steps (batches) to run.
-    num_train_steps: int = 30_000
+    num_train_steps: int = 30000
 
-    # How often (in steps) to log training metrics.
+    # How often (in steps) to log training metrics.f
     log_interval: int = 100
     # How often (in steps) to save checkpoints.
     save_interval: int = 1000
@@ -383,7 +383,7 @@ _CONFIGS = [
         name="pi0_base_aloha_robotwin_lora",
         model=pi0.Pi0Config(paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora"),
         data=LeRobotAlohaDataConfig(
-            repo_id="test",  # your datasets repo_id
+            repo_id="demo_randomized_repo",  # your datasets repo_id
             adapt_to_pi=False,
             repack_transforms=_transforms.Group(inputs=[
                 _transforms.RepackTransform({

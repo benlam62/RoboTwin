@@ -88,8 +88,13 @@ def class_decorator_gen(task_name):
     Returns:
         object: Instance of the task class.
     """
-    envs_module = importlib.import_module(f"envs_gen.gpt_{task_name}")
-    importlib.reload(envs_module)
+    module_name = f"envs_gen.gpt_{task_name}"
+    # Check if the module is already in the cache
+    if module_name in sys.modules:
+        # Delete the module from the cache to force a fresh import
+        del sys.modules[module_name]
+    
+    envs_module = importlib.import_module(module_name)
     try:
         env_class = getattr(envs_module, f"gpt_{task_name}")
         return env_class()
@@ -208,7 +213,7 @@ def setup_task_config(task_name):
         args["embodiment_dis"] = embodiment_type[2]
         args["dual_arm_embodied"] = False
     else:
-        raise Exception("Embodiment items should be 1 or 3")
+        raise Exception(f"Embodiment items is {len(embodiment_type)} which should be 1 or 3")
 
     args["left_embodiment_config"] = get_embodiment_config(args["left_robot_file"])
     args["right_embodiment_config"] = get_embodiment_config(args["right_robot_file"])
@@ -310,7 +315,7 @@ def run(TASK_ENV, args, check_num=10):
     max_error_count = error_num[max_error_index]
 
     print(f'\nComplete test, success rate: {suc_num}/{check_num}')
-    print(f'Error message: {error_list}')
+    #print(f'Error message: {error_list}')
     print(f'Run records: {run_records}')
     print(f'error_num: {error_num}')
 

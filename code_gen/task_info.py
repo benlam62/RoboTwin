@@ -1066,6 +1066,30 @@ PLACE_PHONE_STAND = {
     }
 }
 
+PUT_OBJECT_CABINET = {
+    "task_name": "put_object_cabinet",
+    "task_description": "Use one arm to open the cabinet's drawer, and use another arm to put the object on the table to the cabinet's drawer.\
+                         The object is randomly placed on the table, if the object's x coordinate (dim 0) is greater than 0, use right arm to grasp the object,\
+                         else use the left arm grasp the object."
+    "current_code": """
+                class gpt_put_object_cabinet(put_object_cabinet):
+                    def play_once(self):
+                        pass
+                """,
+    "actor_list": {
+        "self.cabinet": {
+            "name": "cabinet",
+            "description": "The cabinet where the object needs to be put to the cabinet's drawer.",
+            "modelname": "036_cabinet",
+        },
+       "self.object": {
+            "name": "object",
+            "description": "The object that needs to be put to the cabinet's drawer.",
+            "modelname": "047_mouse",  # The object can be any object that is specified in the task
+        }
+    }
+}
+
 PRESS_STAPLER = {
     "task_name": "press_stapler",
     "task_description": "Use one arm to press the stapler.\

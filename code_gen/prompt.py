@@ -1,7 +1,7 @@
 # ====================== PROMPT =============================
 
 BASIC_INFO = '''
-In this environment, distance 1 indicates 1 meter long. Pose is representated as 7 dimention, [x, y, z, qw, qx, qy, qz].
+In this environment, distance 1 indicates 1 meter long. Pose is represented as 7 dimensions, [x, y, z, qw, qx, qy, qz]. 
 For a 7-dimensional Pose object, you can use Pose.p to get the [x, y, z] coordinates and Pose.q to get the [qw, qx, qy, qz] quaternion orientation.
 All functions which has parameter actor, and all of actor should be in the Actor object.
 In the world coordinate system, the positive directions of the xyz coordinate axes are right, front, and upper respectively, so the direction vectors on the right, front,
@@ -138,7 +138,16 @@ functional_point_pose = actor.get_functional_point(point_id, "pose")  # Returns 
 position = functional_point_pose.p  # Get [x, y, z] position of the functional point
 orientation = functional_point_pose.q  # Get [qw, qx, qy, qz] quaternion orientation of the functional point
 ```
-Note: The pose from a functional point is already set according to the expected alignment/direction for the task. For placement, use get_functional_point(point_id, "pose") directly—do NOT construct or rotate your own quaternion.
+Note: The pose from a functional point is already set according to the expected alignment/direction for the task. 
+For placement, use get_functional_point(point_id, "pose") directly—do NOT construct or rotate your own quaternion.
+
+Do not construct the pose say target_pose as below:
+target_p = self.target_block.get_functional_point(1, "p")
+target_q = [qw, qx, qy, qz]
+target_pose = np.concatenate([target_p, target_q])
+
+Instead target_pose should be from get_functional_point(point_id, "pose") 
+
 
 # When stacking one object on top of another (for example, placing blockA on top of blockB):
 target_pose = self.last_actor.get_functional_point(point_id, "pose")
@@ -166,7 +175,7 @@ self.move(
         self.box,
         target_pose=self.actor_pose,  # already a Pose, no need for get_pose()
         arm_tag=grasp_arm_tag,
-        functional_point_id=0,     # functional_point_id can be retrived from the actor list if the actor has functional points
+        functional_point_id=0,     # functional_point_id can be retrieved from the actor list if the actor has functional points
         pre_dis=0,
         dis=0,  # set dis to 0 if is_open is False, and the gripper will not open after placing. Set the `dis` to a small value like 0.02 if you want the gripper to open after placing.
         is_open=False, # if is_open is False, pre_dis and dis will be 0, and the gripper will not open after placing.
@@ -261,8 +270,8 @@ self.move(
     self.place_actor(
         actor=self.actor,
         arm_tag=arm_tag,
-        target_pose=self.target_pose, # self.target_pose can be retrived from the actor list. 
-        functional_point_id=0,  # functional_point_id can be retrived from the actor list if the actor has functional points
+        target_pose=self.target_pose, # self.target_pose can be retrieved from the actor list. 
+        functional_point_id=0,  # functional_point_id can be retrieved from the actor list if the actor has functional points
         pre_dis=0.1,
         dis=0.02, # set dis to 0 if is_open is False, and the gripper will not open after placing. Set the `dis` to a small value like 0.02 if you want the gripper to open after placing.
         is_open=True,  # Controls gripper state after placing: True to release object (default), False to maintain grip on object
@@ -287,7 +296,7 @@ self.move(
         actor=self.actor,
         arm_tag=arm_tag,
         target_pose=target_pose,
-        functional_point_id=0, # functional_point_id can be retrived from the actor list if the actor has functional points
+        functional_point_id=0, # functional_point_id can be retrieved from the actor list if the actor has functional points
         pre_dis=0.1,
         dis=0.02,  # set dis to 0 if is_open is False, and the gripper will not open after placing.
         pre_dis_axis='fp'  # Use functional point direction for pre-displacement, if the functional_point_id is used

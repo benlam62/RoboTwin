@@ -41,12 +41,14 @@ def generate_code(task_info, las_error=None, observation_feedback=None, message:
                 f"# Visual Observation Feedback: \n{observation_feedback}\n\n"
                 f"# Task Description: \n{task_description}\n\n"
                 f"# Actor List: \n{actor_list}\n\n"
+                f"# Current Code:\n{current_code}\n\n"
             )
         else:
             Prompt = (
                 f"The code is unsuccessful, \n# Last Error Message: \n{las_error}\n\n"
                 f"# Task Description: \n{task_description}\n\n"
                 f"# Actor List: \n{actor_list}\n\n"
+                f"# Current Code:\n{current_code}\n\n"
             )
     else:
         res = f'''
@@ -72,9 +74,11 @@ class gpt_{task_name}({task_name}):
             f"# Function Example: \n{function_example}\n\n"
             f"# Current Code:\n{current_code}"
         )
-    message.append({"role": "user", "content": Prompt})
+    message.append({"role": "user", "parts":[{"text": Prompt}]})
+    #message += Prompt
 
     # Start the generation process
+    print("Calling Code Agent")
     res = generate(message)
     res = f'''
 from envs._base_task import Base_Task
@@ -156,8 +160,19 @@ def main(task_info_dic):
     # Keys: "task_name", "task_description", "current_code"
     
     task_info = now_task_info = task_info_dic
-    messages=[{"role": "system", "content": "You need to generate relevant code for some robot tasks in a robot simulation environment based on the provided API."}]
-    generate_num = 5
+    #messages=[{"role": "system", "content": "You need to generate relevant code for some robot tasks in a robot simulation environment based on the provided API."}]
+    messages=[{"role": "user", "parts":[{"text": "You are a helpful AI assistant tasked with generating relevant Python code for robot tasks in a robot simulation environment.\
+        You will be provided with available APIs/Functions and a description of the task.\
+        Your goal is to provide a complete and functional code solution based on the provided information.\
+        Only use functions which are in the available API/function list.\
+        You will also repair the code with the error message and observation feedback from last run.\
+        Here is the task:"}]}]
+    #messages="You are a helpful AI assistant tasked with generating relevant Python code for robot tasks in a robot simulation environment.\
+    #    You will be provided with available APIs/Functions and a description of the task.\
+    #    Your goal is to provide a complete and functional code solution based on the provided information.\
+    #    Only use functions which are in the available API/function list.\
+    #    Here is the task:"
+    generate_num = 10
     success_threshold = 0.5
     las_error_message = None
     observation_feedback = None
@@ -252,7 +267,7 @@ def main(task_info_dic):
 1. pre_dis_axis is not set correctly in the place_actor function; 
 2. the functional point is not set correctly in the place_actor function; 
 3. The pre_dis or dis is not set correctly in the place_actor function;
-4. The constrain is not set correctly in the place_actor function, free or align is not constantly fixed, if the code did not have above error, please try to set the constrain to another value.
+4. The constraint is not set correctly in the place_actor function, free or align is not constantly fixed, if the code did not have above error, please try to set the constraint to another value.
 5. The code didn't take into account the note given in the example function.
 The task can be accomplished only through the existing API and example function, please do not use any other API that is not listed in the available API list and examples.\n"""
         now_task_info["task_description"] = f"{task_description}\nFailed to generate code, error message: {las_error_message}, error count: {str(error_count)}\n" + change_info
