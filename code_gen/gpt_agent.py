@@ -1,10 +1,14 @@
 from openai import OpenAI
 import google.generativeai as genai
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 kimi_api = "Your key"
 openai_api = "Your key"
 deep_seek_api = "Your key"
-GEMINI_API_KEY="AIzaSyAFyuaNpK079lDvnLvF32w4uiabV6Z8IUA"
+GEMINI_API_KEY=os.getenv("GEMINI_KEY")
 
 # Configure the API and key (using DeepSeek as an example)
 def generate(message, gpt="gemini", temperature=0):
