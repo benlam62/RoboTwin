@@ -31,3 +31,4 @@ envs/curobo/*
 policy/pi0/training_data/*
 camera_images/*
 envs_gen/logs/*
+code_gen/.env
